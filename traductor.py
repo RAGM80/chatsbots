@@ -87,14 +87,50 @@ def LimonGPT():
                                                                                                         if usuario == "como estas":
                                                                                                             print("LimonGPT: Sobreviviendo a la anidación extrema.")
                                                                                                         else:
-                                                                                                            if usuario == "salir":
-                                                                                                                break
+                                                                                                            if usuario == "pingüinos":
+                                                                                                                 print("LimonGPT: ¿Sabías que los pingüinos tienen rodillas?")
                                                                                                             else:
-                                                                                                                if usuario == palabranueva:
-                                                                                                                    print("LimonGPT: " + respuestanueva)
+                                                                                                                if usuario == "taco":
+                                                                                                                      print("LimonGPT: Me acabo de comer un taco imaginario.")
                                                                                                                 else:
-                                                                                                                    print("No sé qué es eso. ¿Qué debería responder?")
-                                                                                                                    palabranueva = usuario
-                                                                                                                    respuestanueva = input("Dime la respuesta: ")
-                                                                                                                    print("LimonGPT: a bueno ya se")
+                                                                                                                    if usuario == "pato":
+                                                                                                                         print("LimonGPT: Tu palabra me recordó a un pato con sombrero.")
+                                                                                                                    else:
+                                                                                                                        if usuario == "helado":
+                                                                                                                             print("LimonGPT: Si fueras un helado, serías de mango con chile.")
+                                                                                                                        else:
+                                                                                                                            if usuario == "planeta":
+                                                                                                                                 print("LimonGPT: Acabo de inventar un planeta llamado Churrolandia.")
+                                                                                                                            else:
+                                                                                                                                if usuario == "peces":
+                                                                                                                                     print("LimonGPT: ¿Por qué los peces no usan paraguas?")
+                                                                                                                                else:
+                                                                                                                                    if usuario == "robot":
+                                                                                                                                         print("LimonGPT: Estoy pensando en bailar reguetón con un robot.")
+                                                                                                                                    else:
+                                                                                                                                        if usuario == "ninja":
+                                                                                                                                             print("LimonGPT: Tu palabra activó mi modo ninja invisible.")
+                                                                                                                                        else:
+                                                                                                                                            if usuario == "perro":
+                                                                                                                                                 print("LimonGPT: Me dieron ganas de ladrar como perro… ¡guau!")
+                                                                                                                                            else:
+                                                                                                                                                if usuario == "árboles":
+                                                                                                                                                     print("LimonGPT: ¿Y si los árboles pudieran mandar mensajes de texto?")
+                                                                                                                                                else:
+                                                                                                                                                    if usuario == "tortuga":
+                                                                                                                                                         print("LimonGPT: Acabo de perder una carrera contra una tortuga.")
+                                                                                                                                                    else:
+                                                                                                                                                        if usuario == "lunes":
+                                                                                                                                                             print("LimonGPT: Creo que soy alérgico a los lunes.")
+                                                                                                                                                        else:
+                                                                                                                                                            if usuario == "salir":
+                                                                                                                                                                 break
+                                                                                                                                                            else:
+                                                                                                                                                                if usuario == palabranueva:
+                                                                                                                                                                     print("LimonGPT: " + respuestanueva)
+                                                                                                                                                                else:
+                                                                                                                                                                    print("No sé qué es eso. ¿Qué debería responder?")
+                                                                                                                                                                    palabranueva = usuario
+                                                                                                                                                                    respuestanueva = input("Dime la respuesta: ")
+                                                                                                                                                                    print("LimonGPT: a bueno ya se")
 LimonGPT()
