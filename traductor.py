@@ -20,4 +20,4 @@ while True:
             with open(nombretxt, "a", encoding="utf-8") as f:
                 f.write(usuario + "\n")
                 f.write(nuevaresp + "\n")
-            print("chatlaimon: ¡Gracias! Ya lo guardé.")
+            print("chatlaimon: ya aprendi algo nuevo yay.")
