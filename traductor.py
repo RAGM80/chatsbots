@@ -18,6 +18,6 @@ while True:
         if nuevaresp:
             respuestas[usuario] = nuevaresp
             with open(nombretxt, "a", encoding="utf-8") as f:
-                f.write("\n" +usuario + "\n")
+                f.write("n" +usuario + "\n")
                 f.write(nuevaresp + "\n")
             print("chatlaimon: ¡Gracias! Ya lo guardé.")
