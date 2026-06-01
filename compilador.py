@@ -1,3 +1,4 @@
+#semana de informatica 2026
 import re
 import tkinter as tk
 from tkinter import scrolledtext, simpledialog
@@ -200,13 +201,11 @@ class Parser:
             return ('variable', valor)
         elif tipo == 'ID_NUM':
             self.pos += 1
-            # Rompe el string "n_13" por el guion bajo y extrae el entero numérico
+    
             return ('entero', int(valor.split('_')[1]))
         raise SyntaxError(f"Valor no reconocido en la operación: {valor}")
 
-# ==========================================
-# 3. INTERPRETER 
-# ==========================================
+
 
 class Interpreter:
     def __init__(self, consola_widget): 
@@ -284,9 +283,6 @@ class Interpreter:
                     if not evaluado and bloque_else:
                         self.ejecutar(bloque_else)
 
-# ==========================================
-# 4. IDE TKINTER
-# ==========================================
 
 def compilar_ejecutar():
     codigo = texto_codigo.get("1.0", tk.END)
@@ -312,7 +308,7 @@ tk.Label(root, text="Código Fuente:").pack(anchor="w", padx=10)
 texto_codigo = scrolledtext.ScrolledText(root, height=14, width=75, font=("Consolas", 11))
 texto_codigo.pack(padx=10, pady=5)
 
-# === CÓDIGO DE PRUEBA ACTUALIZADO CON NÚMEROS n_8 Y n_5 ===
+#coigo prueba
 codigo_prueba = """ent @v_calificacion ~
 
 peg [ "=== SISTEMA DE CALIFICACIONES ===" ] ~
