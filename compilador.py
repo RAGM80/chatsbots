@@ -103,14 +103,14 @@ class Parser:
         return instrucciones#devuelve la lista de instrucciones que se encuentran dentro del bloque
 
     def parse_instruccion(self):
-        tipo, valor = self.actual()
+        tipo, valor = self.actual() #lee el tipo y valor del token actual para decidir qué tipo de instrucción es, por ejemplo si es VALIDA entonces es un if, si es TIPO_ENT entonces es una declaración de variable, etc
         
-        if tipo == 'VALIDA':
+        if tipo == 'VALIDA': #if
             self.consumir('VALIDA')
-            self.consumir('PAR_A')
-            condicion = self.parse_expr()
+            self.consumir('PAR_A')#si es valida entonces espera que sea PAR_A osea [luego la condicion
+            condicion = self.parse_expr()#luego de leer la condicion espera que sea PAR_C osea ] 
             self.consumir('PAR_C')
-            bloque_if = self.parse_bloque()
+            bloque_if = self.parse_bloque()#si es espera a que este el bloque de instrucciones del if entre (( y )) 
 
             bloques_elif = []
             while self.actual()[0] == 'TAL_VEZI':
