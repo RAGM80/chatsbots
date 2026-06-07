@@ -2,7 +2,7 @@
 import re
 import tkinter as tk
 from tkinter import scrolledtext, simpledialog
-TOKEN_RAYADOR = [
+TOKEN_RAYADOR = [ #arreglo de tokens
     #el + te dice que puede haber mas numeros o letras no solo 1
     #el e'' le dice Lee todo lo que está dentro de las comillas exactamente carácter por carácter"
     ('FLOT',       r'\d+ç\d+'),    #\d+ busca uno o más dígitos, luego busca la letra física ç, y finalmente \d+ busca otro grupo de uno o más dígitos (ejemplo: 5ç5 o 12ç50). # Decimal
@@ -109,51 +109,52 @@ class Parser:
         if tipo == 'VALIDA': #if
             self.consumir('VALIDA')
             self.consumir('PAR_A')#si es valida entonces espera que sea PAR_A osea [luego la condicion
-            condicion = self.parse_expr()#luego de leer la condicion espera que sea PAR_C osea ] 
-            self.consumir('PAR_C')
+            condicion = self.parse_expr()#este guarda la condicion del if 
+            self.consumir('PAR_C')#]
             bloque_if = self.parse_bloque()#si es espera a que este el bloque de instrucciones del if entre (( y )) 
 
-            bloques_elif = []
-            while self.actual()[0] == 'TAL_VEZI':
-                self.consumir('TAL_VEZI')
-                self.consumir('PAR_A')
-                cond_elif = self.parse_expr()
-                self.consumir('PAR_C')
-                bloque_elif = self.parse_bloque()
-                bloques_elif.append((cond_elif, bloque_elif))
+            bloques_elif = [] #aqui se guardan los else if
+            while self.actual()[0] == 'TAL_VEZI': #si crea mas de un talvezi entonces se lee por orden desde el primero hasta el ultimo o que llegue a sino o u fin
+                self.consumir('TAL_VEZI')#revisa si es un talevezi 
+                self.consumir('PAR_A')#luego de validar tambien espera que sea PAR_A osea [ y lego la condicion
+                cond_elif = self.parse_expr()#aqui se guarda la condicion del else if
+                self.consumir('PAR_C') #]
+                bloque_elif = self.parse_bloque()#si es un talevezi entonces espera a que este el bloque de instrucciones del else if entre (( y ))
+                bloques_elif.append((cond_elif, bloque_elif))#si hay otro talevezi se agrega a la lista de bloques elif junto con su condicion
 
-            bloque_else = None
-            if self.actual()[0] == 'SINO':
-                self.consumir('SINO')
-                bloque_else = self.parse_bloque()
+            bloque_else = None #significa que no es necesario un bloue sino osea else
+            if self.actual()[0] == 'SINO':#si encuentra un sino entoces comiensa a leer desde 0
+                self.consumir('SINO')#al igual que if y elif revisa que sea un sino y luego espera que este
+                bloque_else = self.parse_bloque()#si es sino entones espera a que este el bloque de instrucciones del else entre (( y ))
 
-            return ('if', condicion, bloque_if, bloques_elif, bloque_else)
+            return ('if', condicion, bloque_if, bloques_elif, bloque_else)#agrupa toda la info del if,elif y else en un sola cosa para que los interprete
 
-        elif tipo in ('TIPO_ENT', 'TIPO_FLOT', 'TIPO_DOBLE', 'TIPO_LARGO'):
-            self.consumir(tipo) 
-            tipo_id, nombre_var = self.actual()
+        elif tipo in ('TIPO_ENT', 'TIPO_FLOT', 'TIPO_DOBLE', 'TIPO_LARGO'):#revisa si es una de estas palabras reservadas
+            self.consumir(tipo) #valida si es una palabra reservada de tipo de dato
+            tipo_id, nombre_var = self.actual()#dependiendo del tipo de dato que sea, espera que el siguiente token sea como su instruccion
             
-            if tipo_id == 'ID_VAR':
-                self.consumir(tipo_id)
+            if tipo_id == 'ID_VAR':#el tipo de dato espera que sea esa variable que comienze con @v_
+                self.consumir(tipo_id)#valida que sea tipo identificador de variable
             else:
-                raise SyntaxError(f"Nombre inválido '{nombre_var}'. Debe iniciar con @v_")
+                raise SyntaxError(f"Nombre inválido '{nombre_var}'. Debe iniciar con @v_")#en caso de que no sea una variable valida, se detiene el programa y muestra un mensaje de error indicando que el nombre es inválido y debe iniciar con @v_
             
-            if self.actual()[0] == 'ASIGNADOR':
-                self.consumir('ASIGNADOR')
-                expr = self.parse_expr()
-                self.consumir('FIN')
-                return ('asignacion_decl', nombre_var, expr)
-            else:
-                self.consumir('FIN')
-                return ('declaracion', nombre_var)
+            if self.actual()[0] == 'ASIGNADOR':#revisa que sea el token osea >> y si es asi comienza a leer desde 0
+                self.consumir('ASIGNADOR')#valida que sea el token de asignacion >>
+                expr = self.parse_expr()#analiza la expresion que se encuentra  la derecha
+                self.consumir('FIN')#valida que la instruccion termine con ~
+                return ('asignacion_decl', nombre_var, expr)#asignacion_decl significa la variable a la izquerda y nombre_var es el nombre
 
-        elif tipo == 'PEG':
-            self.consumir('PEG')
-            self.consumir('PAR_A')
-            expr = self.parse_expr()
-            self.consumir('PAR_C')
-            self.consumir('FIN')
-            return ('imprimir', expr)
+            else:#si no le dio un vaalor a una variable
+                self.consumir('FIN')#exige el  fin de la instruccion con ~
+                return ('declaracion', nombre_var)#si guarda una declaracion d evariable pero sin valor
+
+        elif tipo == 'PEG':#analiza si es un pegoseaun pritf
+            self.consumir('PEG')#valida que sea un peg 
+            self.consumir('PAR_A')#valida que despues del peg haya un [
+            expr = self.parse_expr()#analiza lo que seenncuentra dentro del [] que puede ser una operacion o una variable o un texto o un numero etc etc
+            self.consumir('PAR_C')#despues valida que cierre con un ]
+            self.consumir('FIN')#valida que termine con un 
+            return ('imprimir', expr)#usa el imprimir  para que interprete que es la accion y usa el expr paa que sepa lo que va a imprimir
             
         elif tipo == 'ESCANEA':
             self.consumir('ESCANEA')
@@ -335,4 +336,4 @@ consola = scrolledtext.ScrolledText(root, height=10, width=75, state=tk.DISABLED
 consola.pack(padx=10, pady=5)
 
 if __name__ == "__main__":
-    root.mainloop()
+    root.mainloop() 

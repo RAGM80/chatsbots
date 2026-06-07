@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import scrolledtext
 import os
 
-nombretxt = "memoria.txt"  
+carpeta_actual = os.path.dirname(os.path.abspath(__file__))
+nombretxt = os.path.join(carpeta_actual, "memoria.txt") 
 respuestas = {}
 
 if not os.path.exists(nombretxt):
@@ -10,10 +11,11 @@ if not os.path.exists(nombretxt):
         pass
 
 with open(nombretxt, "r", encoding="utf-8") as f: 
-    lineas = f.readlines()
-    for i in range(0, len(lineas)-1, 2): 
-        pregunta = lineas[i].replace("\n", "")
-        respuesta = lineas[i+1].replace("\n", "")
+    lineas = [linea.strip() for linea in f.readlines() if linea.strip()]
+    
+    for i in range(0, len(lineas) - 1, 2): 
+        pregunta = lineas[i].lower()
+        respuesta = lineas[i+1]
         respuestas[pregunta] = respuesta
 
 estado_aprendizaje = False
@@ -36,9 +38,9 @@ def procesar_mensaje(event=None):
         return
 
     if estado_aprendizaje:
-        
         nuevaresp = usuario
-        respuestas[pregunta_pendiente] = nuevaresp
+        # MODIFICACIÓN: Guarda la clave en minúsculas en el diccionario
+        respuestas[pregunta_pendiente.lower()] = nuevaresp
         
         with open(nombretxt, "a", encoding="utf-8") as f:
             f.write(pregunta_pendiente + "\n")
@@ -49,11 +51,20 @@ def procesar_mensaje(event=None):
         estado_aprendizaje = False
         pregunta_pendiente = ""
     else:
-        if usuario in respuestas:
-            chat_area.insert(tk.END, "ChatLaimon: " + respuestas[usuario] + "\n\n")
-        else:
+        usuario_minuscula = usuario.lower()
+        encontrado = False
+        
+        # Recorremos el diccionario para buscar coincidencias parciales
+        for pregunta_guardada, respuesta_guardada in respuestas.items():
+            # Verifica si la palabra clave está en el mensaje o al revés
+            if pregunta_guardada in usuario_minuscula or usuario_minuscula in pregunta_guardada:
+                chat_area.insert(tk.END, "ChatLaimon: " + respuesta_guardada + "\n\n")
+                encontrado = True
+                break  # Detiene la búsqueda al encontrar la primera coincidencia
+        
+        # Si después de revisar todo no encontró similitud, entra en modo aprendizaje
+        if not encontrado:
             chat_area.insert(tk.END, "ChatLaimon: No sé qué decir. ¿qué te digo? (Escribe la respuesta para enseñarme)\n\n")
-          
             estado_aprendizaje = True
             pregunta_pendiente = usuario
     
