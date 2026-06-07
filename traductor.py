@@ -39,7 +39,6 @@ def procesar_mensaje(event=None):
 
     if estado_aprendizaje:
         nuevaresp = usuario
-        # MODIFICACIÓN: Guarda la clave en minúsculas en el diccionario
         respuestas[pregunta_pendiente.lower()] = nuevaresp
         
         with open(nombretxt, "a", encoding="utf-8") as f:
@@ -54,15 +53,11 @@ def procesar_mensaje(event=None):
         usuario_minuscula = usuario.lower()
         encontrado = False
         
-        # Recorremos el diccionario para buscar coincidencias parciales
         for pregunta_guardada, respuesta_guardada in respuestas.items():
-            # Verifica si la palabra clave está en el mensaje o al revés
             if pregunta_guardada in usuario_minuscula or usuario_minuscula in pregunta_guardada:
                 chat_area.insert(tk.END, "ChatLaimon: " + respuesta_guardada + "\n\n")
                 encontrado = True
-                break  # Detiene la búsqueda al encontrar la primera coincidencia
-        
-        # Si después de revisar todo no encontró similitud, entra en modo aprendizaje
+                break 
         if not encontrado:
             chat_area.insert(tk.END, "ChatLaimon: No sé qué decir. ¿qué te digo? (Escribe la respuesta para enseñarme)\n\n")
             estado_aprendizaje = True
