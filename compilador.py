@@ -156,102 +156,101 @@ class Parser:
             self.consumir('FIN')#valida que termine con un 
             return ('imprimir', expr)#usa el imprimir  para que interprete que es la accion y usa el expr paa que sepa lo que va a imprimir
             
-        elif tipo == 'ESCANEA':
-            self.consumir('ESCANEA')
-            self.consumir('PAR_A')
-            tipo_id, nombre_var = self.actual()
-            if tipo_id == 'ID_VAR':
-                self.consumir(tipo_id)
+        elif tipo == 'ESCANEA': #analiza si es un escanea osea un scanf
+            self.consumir('ESCANEA')#valida que sea un escanea
+            self.consumir('PAR_A')#valida que despues del escanea haya un [
+            tipo_id, nombre_var = self.actual()#revisa que lo que este dentro del [] sea una variable valida
+            if tipo_id == 'ID_VAR':#si es una variable valida entonces se consume y se guarda el nombre de la variable para que el interprete sepa a donde guardar el valor que el usuario ingrese
+                self.consumir(tipo_id)#valida que sea un identificador de variable
             else:
-                raise SyntaxError(f"escanea requiere una variable válida, encontré '{nombre_var}'")
-            self.consumir('PAR_C')
-            self.consumir('FIN')
-            return ('leer', nombre_var)
+                raise SyntaxError(f"escanea requiere una variable válida, encontré '{nombre_var}'")#si no es una variable valida, se detiene el programa y muestra un mensaje de error indicando que escanea requiere una variable válida
+            self.consumir('PAR_C')#valida que cierre con un ]
+            self.consumir('FIN')#valida que termine con un ~
+            return ('leer', nombre_var)#le indica al interprete que esta es una instruccion de lectura y le da el nombre de la variable para que sepa donde guardar el valor que el usuario ingrese
 
-        elif tipo == 'ID_VAR':
-            nombre = self.consumir(tipo)
-            self.consumir('ASIGNADOR')
-            expr = self.parse_expr()
-            self.consumir('FIN')
-            return ('asignacion', nombre, expr)
+        elif tipo == 'ID_VAR':#si la instruccion comienza con una variable entonces puede ser una asignacion de valor a esa variable
+            nombre = self.consumir(tipo)#guarda el nombre de la variable para que el interprete sepa a cual variable le va a asignar el valor
+            self.consumir('ASIGNADOR')#valida que despues de la variable haya un token de asignacion >>
+            expr = self.parse_expr()#analiza la expresion que se encuentra a la derecha del token de asignacion, puede ser una operacion, un numero, un texto o incluso otra variable
+            self.consumir('FIN')#valida que la instruccion termine con un ~
+            return ('asignacion', nombre, expr)#si es una asignacion normal sin declaracion previa, entonces se le indica al interprete que esta es una instruccion de asignacion y se le da el nombre de la variable y la expresion que se va a evaluar para obtener el valor a asignar a esa variable
             
-        return None
+        return None#si no se reconoce el tipo de instruccion, devuelve None para que el parser principal pueda decidir si avanza al siguiente token o si muestra un error de sintaxis
 
-    def parse_expr(self):
-        izq = self.parse_termino()
-        tipo, valor = self.actual()
-        if tipo in ('SUMA', 'REST', 'MULT', 'DIVS', 'MODU', 'POW', 'MAYOR', 'MENOR', 'Y', 'O'):
-            self.pos += 1
-            der = self.parse_termino()
-            return ('operacion', izq, valor.lower(), der)
-        return izq
+    def parse_expr(self):#analiza las expresiones que pueden ser operaciones entre terminos o simplemente un termino solo, por ejemplo puede analizar algo como 5 suma 3 o @v_edad mult 2 o incluso una sola variable o numero o texto
+        izq = self.parse_termino()#analiza el primer termino de la expresion, que puede ser un numero, un texto, una variable o incluso otra operacion si es que hay parentesis o corchetes para indicar precedencia
+        tipo, valor = self.actual()#despues de analizar el primer termino, revisa si el siguiente token es un operador como suma, rest, mult, divs, etc para saber si tiene que analizar otra parte de la expresion o si simplemente devuelve el termino analizado
+        if tipo in ('SUMA', 'REST', 'MULT', 'DIVS', 'MODU', 'POW', 'MAYOR', 'MENOR', 'Y', 'O'):#si el siguiente token es un operador entonces se analiza la parte derecha de la expresion para obtener el segundo termino y luego se devuelve una tupla que representa la operacion completa con su operador y sus operandos
+            self.pos += 1#si es un operador valido entonces avanza al siguiente token para analizar el segundo termino de la operacion
+            der = self.parse_termino()#analiza el segundo termino de la operacion, que puede ser un numero, un texto, una variable o incluso otra operacion si es que hay parentesis o corchetes para indicar precedencia
+            return ('operacion', izq, valor.lower(), der)#devuelve una tupla que representa la operacion completa, donde 'operacion' es un identificador para que el interprete sepa que esto es una operacion, izq es el primer termino analizado, valor.lower() es el operador en minusculas para facilitar su manejo en el interprete, y der es el segundo termino analizado
+        return izq#si no hay operador, simplemente devuelve el termino analizado como resultado de la expresion
 
-    def parse_termino(self):
-        tipo, valor = self.actual()
-        if tipo == 'ENT':
-            self.pos += 1
-            return ('entero', int(valor))
-        elif tipo == 'FLOT':
-            self.pos += 1
-            return ('flotante', float(valor.replace('ç', '.')))
-        elif tipo == 'CADENA':
-            self.pos += 1
-            return ('cadena', valor[1:-1]) 
-        elif tipo == 'ID_VAR':
-            self.pos += 1
-            return ('variable', valor)
-        elif tipo == 'ID_NUM':
-            self.pos += 1
-    
-            return ('entero', int(valor.split('_')[1]))
-        raise SyntaxError(f"Valor no reconocido en la operación: {valor}")
-
+    def parse_termino(self):#analiza un termino que puede ser un numero, un texto, una variable o incluso otra operacion si es que hay parentesis o corchetes para indicar precedencia
+        tipo, valor = self.actual()#lee el tipo y valor del token actual para decidir qué tipo de termino es, por ejemplo si es un numero entero o flotante, un texto entre comillas, una variable que comienza con @v_, o incluso una operacion entre parentesis o corchetes
+        if tipo == 'ENT':#si es un numero entero entonces devuelve una tupla con el tipo 'entero' y el valor convertido a int para que el interprete lo maneje como un numero entero
+            self.pos += 1#si es un numero entero entonces avanza al siguiente token para seguir analizando la expresion
+            return ('entero', int(valor))#devuelve una tupla que representa un numero entero, donde 'entero' es un identificador para que el interprete sepa que esto es un numero entero, y int(valor) es el valor del numero convertido a tipo entero para que el interprete lo maneje como un numero en lugar de una cadena de texto
+        elif tipo == 'FLOT':#si es un numero flotante entonces devuelve una tupla con el tipo 'flotante' y el valor convertido a float para que el interprete lo maneje como un numero flotante
+            self.pos += 1#si es un numero flotante entonces avanza al siguiente token para seguir analizando la expresion
+            return ('flotante', float(valor.replace('ç', '.')))#devuelve una tupla que representa un numero flotante, donde 'flotante' es un identificador para que el interprete sepa que esto es un numero flotante, y float(valor.replace('ç', '.')) es el valor del numero convertido a tipo flotante para que el interprete lo maneje como un numero en lugar de una cadena de texto, además se reemplaza la letra  ç por un punto para que Python pueda reconocerlo como un número decimal
+        elif tipo == 'CADENA':#si es un texto entre comillas entonces devuelve una tupla con el tipo 'cadena' y el valor sin las comillas para que el interprete lo maneje como un texto
+            self.pos += 1#si es un texto entre comillas entonces avanza al siguiente token para seguir analizando la expresion
+            return ('cadena', valor[1:-1]) #devuelve una tupla que representa un texto, donde 'cadena' es un identificador para que el interprete sepa que esto es un texto, y valor[1:-1] es el valor del texto sin las comillas al inicio y al final para que el interprete lo maneje como un texto 
+        elif tipo == 'ID_VAR':#si es una variable que comienza con @v_ entonces devuelve una tupla con el tipo 'variable' y el nombre de la variable para que el interprete lo maneje como una variable y pueda buscar su valor en el diccionario de variables
+            self.pos += 1#si es una variable que comienza con @v_ entonces avanza al siguiente token para seguir analizando la expresion
+            return ('variable', valor)#devuelve una tupla que representa una variable, donde 'variable' es un identificador para que el interprete sepa que esto es una variable, y valor es el nombre de la variable tal como aparece en el código fuente para que el interprete lo maneje como una variable y pueda buscar su valor en el diccionario de variables usando ese nombre
+        elif tipo == 'ID_NUM':#si es un numero que comienza con n_ entonces devuelve una tupla con el tipo 'entero' y el valor convertido a int para que el interprete lo maneje como un numero entero, esto se usa para los numeros que aparecen en las condiciones como n_5 o n_10 para que el usuario no tenga que escribir un numero literal y pueda usar esta forma de escribir numeros en las condiciones de if, elif, while, etc
+            self.pos += 1#si es un numero que comienza con n_ entonces avanza al siguiente token para seguir analizando la expresion
+            return ('entero', int(valor.split('_')[1]))#devuelve una tupla que representa un numero entero, donde 'entero' es un identificador para que el interprete sepa que esto es un numero entero, y int(valor.split('_')[1]) es el valor del numero convertido a tipo entero para que el interprete lo maneje como un numero en lugar de una cadena de texto, además se usa split('_')[1] para obtener solo la parte del numero después de n_ y convertirla a entero
+        raise SyntaxError(f"Valor no reconocido en la operación: {valor}")#si el token no es un numero, ni un texto, ni una variable, ni un numero con n_, entonces se detiene el programa y muestra un mensaje de error indicando que el valor no es reconocido en la operación, esto ayuda a detectar errores como escribir mal un numero o una variable o usar un simbolo que no es válido en la expresión
 
 
-class Interpreter:
-    def __init__(self, consola_widget): 
-        self.variables = {}
-        self.consola = consola_widget
 
-    def imprimir(self, texto):
-        self.consola.insert(tk.END, str(texto) + "\n")
+class Interpreter:#aqui se ejecutan las instrucciones parseadas por el parser, recibe la consola para poder imprimir los resultados de las instrucciones de impresión y para mostrar los errores que puedan ocurrir durante la ejecución
+    def __init__(self, consola_widget): #inicializa el diccionario de variables para guardar los valores de las variables declaradas y asignadas durante la ejecución, y guarda la referencia al widget de consola para poder imprimir en él
+        self.variables = {}#diccionario para guardar las variables y sus valores, por ejemplo {'@v_edad': 20, '@v_nombre': 'Limon'}
+        self.consola = consola_widget#referencia al widget de consola para poder imprimir los resultados de las instrucciones de impresión y para mostrar los errores que puedan ocurrir durante la ejecución
 
-    def evaluar(self, nodo):
-        tipo = nodo[0]
-        if tipo == 'entero': return nodo[1]
-        if tipo == 'flotante': return nodo[1]
-        if tipo == 'cadena': return nodo[1]
-        if tipo == 'variable': 
-            if nodo[1] not in self.variables:
-                raise RuntimeError(f"Error: La variable '{nodo[1]}' no tiene valor.")
-            return self.variables[nodo[1]]
+    def imprimir(self, texto):#método para imprimir texto en la consola, recibe el texto a imprimir y lo inserta al final del widget de consola seguido de un salto de línea para que cada impresión aparezca en una nueva línea
+        self.consola.insert(tk.END, str(texto) + "\n")#inserta el texto convertido a cadena en el widget de consola, seguido de un salto de línea para que cada impresión aparezca en una nueva línea
+
+    def evaluar(self, nodo):#método para evaluar un nodo de la expresión, recibe un nodo que puede ser un numero, un texto, una variable o una operación, y devuelve el valor resultante de evaluar ese nodo, por ejemplo si el nodo es ('entero', 5) devuelve 5, si el nodo es ('variable', '@v_edad') busca el valor de @v_edad en el diccionario de variables y lo devuelve, si el nodo es una operación entonces evalua los operandos y aplica el operador para devolver el resultado de la operación
+        tipo = nodo[0]#el tipo del nodo es el primer elemento de la tupla, por ejemplo 'entero', 'flotante', 'cadena', 'variable' o 'operacion'
+        if tipo == 'entero': return nodo[1]#si el tipo del nodo es 'entero', devuelve el segundo elemento de la tupla que es el valor del numero entero, por ejemplo si el nodo es ('entero', 5) entonces devuelve 5
+        if tipo == 'flotante': return nodo[1]#si el tipo del nodo es 'flotante', devuelve el segundo elemento de la tupla que es el valor del numero flotante, por ejemplo si el nodo es ('flotante', 3.14) entonces devuelve 3.14
+        if tipo == 'cadena': return nodo[1]#si el tipo del nodo es 'cadena', devuelve el segundo elemento de la tupla que es el valor de la cadena, por ejemplo si el nodo es ('cadena', 'Hola, mundo!') entonces devuelve 'Hola, mundo!'
+        if tipo == 'variable':#si el tipo del nodo es 'variable', busca el valor de la variable en el diccionario de variables usando el nombre de la variable que es el segundo elemento de la tupla, por ejemplo si el nodo es ('variable', '@v_edad') entonces busca el valor de @v_edad en el diccionario de variables y lo devuelve, si la variable no existe en el diccionario, se detiene el programa y muestra un mensaje de error indicando que la variable no tiene valor 
+            if nodo[1] not in self.variables:#si el nombre de la variable que se quiere evaluar no existe en el diccionario de variables, entonces se detiene el programa y muestra un mensaje de error indicando que la variable no tiene valor, esto ayuda a detectar errores como usar una variable sin declararla o sin asignarle un valor antes de usarla
+                raise RuntimeError(f"Error: La variable '{nodo[1]}' no tiene valor.")#si el nombre de la variable que se quiere evaluar no existe en el diccionario de variables, entonces se detiene el programa y muestra un mensaje de error indicando que la variable no tiene valor, esto ayuda a detectar errores como usar una variable sin declararla o sin asignarle un valor antes de usarla
+            return self.variables[nodo[1]]#si el nombre de la variable que se quiere evaluar existe en el diccionario de variables, entonces devuelve su valor para que pueda ser usado en la expresión, por ejemplo si el nodo es ('variable', '@v_edad') y en el diccionario de variables tenemos {'@v_edad': 20}, entonces devuelve 20
             
-        if tipo == 'operacion':
-            izq = self.evaluar(nodo[1])
-            der = self.evaluar(nodo[3])
-            op = nodo[2]
+        if tipo == 'operacion':#si el tipo del nodo es 'operacion', entonces se evalua la operación, para eso primero se evalua el operando izquierdo que es el segundo elemento de la tupla, luego se evalua el operando derecho que es el cuarto elemento de la tupla, y luego se aplica el operador que es el tercer elemento de la tupla para obtener el resultado de la operación, por ejemplo si el nodo es ('operacion', ('entero', 5), 'suma', ('entero', 3)) entonces primero se evalua ('entero', 5) que devuelve 5, luego se evalua ('entero', 3) que devuelve 3, y luego se aplica el operador 'suma' para obtener el resultado de 5 + 3 que es 8
+            izq = self.evaluar(nodo[1])#evalua el operando izquierdo de la operación, que es el segundo elemento de la tupla,
+            der = self.evaluar(nodo[3])#evalua el operando derecho de la operación, que es el cuarto elemento de la tupla,
+            op = nodo[2]#obtiene el operador de la operación, que es el tercer elemento de la tupla, y lo convierte a minusculas para facilitar su manejo en el interprete, por ejemplo 'suma', 'rest', 'mult', 'divs', etc
             
-            if op == 'suma': return izq + der
-            if op == 'rest': return izq - der
-            if op == 'mult': return izq * der
-            if op == 'divs': return izq / der
-            if op == 'modu': return izq % der
-            if op == 'pow': return izq ** der
+            if op == 'suma': return izq + der#si el operador es 'suma', devuelve la suma del operando izquierdo y el operando derecho, por ejemplo si izq es 5 y der es 3, entonces devuelve 8
+            if op == 'rest': return izq - der#si el operador es 'rest', devuelve la resta del operando izquierdo y el operando derecho, por ejemplo si izq es 5 y der es 3, entonces devuelve 2
+            if op == 'mult': return izq * der#si el operador es 'mult', devuelve la multiplicación del operando izquierdo y el operando derecho, por ejemplo si izq es 5 y der es 3, entonces devuelve 15
+            if op == 'divs': return izq / der#si el operador es 'divs', devuelve la división del operando izquierdo y el operando derecho, por ejemplo si izq es 5 y der es 3, entonces devuelve 1.666...
+            if op == 'modu': return izq % der#si el operador es 'modu', devuelve el módulo del operando izquierdo y el operando derecho, por ejemplo si izq es 5 y der es 3, entonces devuelve 2
+            if op == 'pow': return izq ** der#si el operador es 'pow', devuelve la potencia del operando izquierdo y el operando derecho, por ejemplo si izq es 5 y der es 3, entonces devuelve 125
             
-            if op == 'mayor': return izq > der
-            if op == 'menor': return izq < der
-            if op == 'y': return izq and der
-            if op == 'o': return izq or der
+            if op == 'mayor': return izq > der#si el operador es 'mayor', devuelve True si el operando izquierdo es mayor que el operando derecho, False en caso contrario, por ejemplo si izq es 5 y der es 3, entonces devuelve True
+            if op == 'menor': return izq < der#si el operador es 'menor', devuelve True si el operando izquierdo es menor que el operando derecho, False en caso contrario, por ejemplo si izq es 5 y der es 3, entonces devuelve False
+            if op == 'y': return izq and der#si el operador es 'y', devuelve True si ambos operandos son True, False en caso contrario, por ejemplo si izq es True y der es False, entonces devuelve False
+            if op == 'o': return izq or der#si el operador es 'o', devuelve True si al menos uno de los operandos es True, False en caso contrario, por ejemplo si izq es True y der es False, entonces devuelve True
 
-    def ejecutar(self, instrucciones):
-        for inst in instrucciones:
-            if inst[0] == 'declaracion':
-                nombre = inst[1]
-                self.variables[nombre] = 0 
-            elif inst[0] in ('asignacion', 'asignacion_decl'):
-                nombre = inst[1]
-                valor = self.evaluar(inst[2])
-                self.variables[nombre] = valor 
+    def ejecutar(self, instrucciones):#método para ejecutar una lista de instrucciones parseadas por el parser, recibe una lista de instrucciones que pueden ser declaraciones de variables, asignaciones de valores a variables, instrucciones de impresión, instrucciones de lectura, o estructuras de control como if, elif y else, y ejecuta cada instruccion en orden para llevar a cabo la lógica del programa
+        for inst in instrucciones:#recorre cada instruccion de la lista de instrucciones para ejecutarla, por ejemplo si la instruccion es una declaración de variable, entonces se agrega la variable al diccionario de variables con un valor inicial de 0, si la instruccion es una asignacion de valor a una variable, entonces se evalua la expresion del lado derecho y se asigna el resultado a la variable en el diccionario de variables, si la instruccion es una instruccion de impresión, entonces se evalua la expresion a imprimir y se muestra en la consola, si la instruccion es una instruccion de lectura, entonces se muestra un cuadro de diálogo para que el usuario ingrese un valor y se asigna ese valor a la variable correspondiente en el diccionario de variables, si la instruccion es una estructura de control como if, elif o else, entonces se evalua la condicion y se ejecuta el bloque de instrucciones correspondiente según el resultado de la condicion
+            if inst[0] == 'declaracion':#si la instruccion es una declaración de variable sin asignación de valor, entonces se agrega la variable al diccionario de variables con un valor inicial de 0 para que el programa pueda seguir ejecutándose sin errores, aunque lo ideal sería que el usuario siempre asigne un valor a las variables para evitar confusiones
+                nombre = inst[1]#el nombre de la variable es el segundo elemento de la tupla de la instruccion, por ejemplo si la instruccion es ('declaracion', '@v_edad') entonces el nombre de la variable es '@v_edad'
+                self.variables[nombre] = 0 #se agrega la variable al diccionario de variables con un valor inicial de 0, por ejemplo si el nombre de la variable es '@v_edad', entonces se agrega '@v_edad': 0 al diccionario de variables
+            elif inst[0] in ('asignacion', 'asignacion_decl'):#si la instruccion es una asignacion de valor a una variable, ya sea con declaración previa o sin ella, entonces se evalua la expresion del lado derecho para obtener el valor a asignar, y luego se asigna ese valor a la variable en el diccionario de variables, 
+                nombre = inst[1]#el nombre de la variable a la que se le va a asignar el valor es el segundo elemento de la tupla de la instruccion, por ejemplo si la instruccion es ('asignacion', '@v_edad', expr) entonces el nombre de la variable es '@v_edad'
+                valor = self.evaluar(inst[2])#se evalua la expresion que se encuentra a la derecha del token de asignacion para obtener el valor a asignar a la variable, por ejemplo si la instruccion es ('asignacion', '@v_edad', ('operacion', ('entero', 20), 'suma', ('entero', 5))) entonces se evalua la expresion ('operacion', ('entero', 20), 'suma', ('entero', 5)) que devuelve 25, y ese es el valor que se va a asignar a @v_edad
+                self.variables[nombre] = valor #se asigna el valor obtenido al nombre de la variable en el diccionario de variables, por ejemplo si el nombre de la variable es '@v_edad' y el valor obtenido es 25, entonces se asigna '@v_edad': 25 en el diccionario de variables para que a partir de ese momento @v_edad tenga el valor de 25 cuando se evalue su nodo en la expresión
             elif inst[0] == 'imprimir':
                 valor = self.evaluar(inst[1])
                 self.imprimir(valor) 
