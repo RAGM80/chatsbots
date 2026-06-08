@@ -251,62 +251,58 @@ class Interpreter:#aqui se ejecutan las instrucciones parseadas por el parser, r
                 nombre = inst[1]#el nombre de la variable a la que se le va a asignar el valor es el segundo elemento de la tupla de la instruccion, por ejemplo si la instruccion es ('asignacion', '@v_edad', expr) entonces el nombre de la variable es '@v_edad'
                 valor = self.evaluar(inst[2])#se evalua la expresion que se encuentra a la derecha del token de asignacion para obtener el valor a asignar a la variable, por ejemplo si la instruccion es ('asignacion', '@v_edad', ('operacion', ('entero', 20), 'suma', ('entero', 5))) entonces se evalua la expresion ('operacion', ('entero', 20), 'suma', ('entero', 5)) que devuelve 25, y ese es el valor que se va a asignar a @v_edad
                 self.variables[nombre] = valor #se asigna el valor obtenido al nombre de la variable en el diccionario de variables, por ejemplo si el nombre de la variable es '@v_edad' y el valor obtenido es 25, entonces se asigna '@v_edad': 25 en el diccionario de variables para que a partir de ese momento @v_edad tenga el valor de 25 cuando se evalue su nodo en la expresión
-            elif inst[0] == 'imprimir':
-                valor = self.evaluar(inst[1])
-                self.imprimir(valor) 
-            elif inst[0] == 'leer':
-                nombre = inst[1]
-                valor_str = simpledialog.askstring("Entrada de Datos", f"Ingresa valor para {nombre}:")
-                if valor_str is None:
+            elif inst[0] == 'imprimir':#si la instruccion es una instruccion de impresión, entonces se evalua la expresion que se encuentra dentro del peg para obtener el valor a imprimir, y luego se muestra ese valor en la consola usando el método imprimir, 
+                self.imprimir(valor)#se evalua la expresion que se encuentra dentro del peg para obtener el valor a imprimir, 
+                nombre = inst[1]#el valor a imprimir es el segundo elemento de la tupla de la instruccion, por ejemplo si la instruccion es ('imprimir', ('operacion', ('entero', 5), 'suma', ('entero', 3))) entonces el valor a imprimir es la expresion ('operacion', ('entero', 5), 'suma', ('entero', 3)) que se evalua para obtener el resultado de 8, y ese es el valor que se va a imprimir en la consola
+                valor_str = simpledialog.askstring("Entrada de Datos", f"Ingresa valor para {nombre}:")#si la instruccion es una instruccion de lectura, entonces se muestra un cuadro de diálogo para que el usuario ingrese un valor, y ese valor se asigna a la variable correspondiente en el diccionario de variables, 
+                if valor_str is None:#si el usuario cancela el cuadro de diálogo o no ingresa ningún valor, entonces se detiene el programa y muestra un mensaje de error indicando que la entrada fue cancelada, esto ayuda a evitar que el programa siga ejecutándose con un valor nulo o vacío que podría causar errores en las operaciones posteriores
                     raise RuntimeError("Entrada cancelada.")
                 try:
-                    if 'ç' in valor_str:
-                        valor = float(valor_str.replace('ç', '.'))
-                    else:
-                        valor = int(valor_str)
-                except ValueError:
-                    valor = valor_str 
-                self.variables[nombre] = valor
+                    if 'ç' in valor_str:#si el valor ingresado por el usuario contiene la letra ç
+                        valor = int(valor_str)#enotnces se intenta convertir el valor ingresado a un número entero, esto es para permitir que el usuario ingrese números decimales usando la letra ç como separador decimal
+                except ValueError:#si marca un error de valor entonces
+                    valor = valor_str #si el valor ingresado no se puede convertir a un número entero, entonces se asume que es un texto y se asigna el valor ingresado como una cadena de texto, esto permite que el usuario ingrese tanto números como textos en las instrucciones de lectura sin causar errores de conversión
+                self.variables[nombre] = valor#se asigna el valor ingresado por el usuario a la variable correspondiente en el diccionario de variables, 
             
-            elif inst[0] == 'if':
+            elif inst[0] == 'if':#si la instruccion es una estructura de control if, entonces se evalua la condicion del if para determinar si se ejecuta el bloque de instrucciones del if o si se evaluan las condiciones de los elif o si se ejecuta el bloque de instrucciones del else, dependiendo del resultado de las evaluaciones de las condiciones
                 _, condicion, bloque_if, bloques_elif, bloque_else = inst
                 
-                if self.evaluar(condicion):
-                    self.ejecutar(bloque_if)
-                else:
+                if self.evaluar(condicion):#si la condicion del if se evalua como True, entonces se ejecuta el bloque de instrucciones del if usando el método ejecutar para ejecutar cada instruccion dentro del bloque, y luego se continúa con la siguiente instruccion después del if sin evaluar los elif ni el else
+                    self.ejecutar(bloque_if)#se ejecuta 
+                else:#pero si es false el if entonces
                     evaluado = False
-                    for cond_elif, block_elif in bloques_elif:
-                        if self.evaluar(cond_elif):
-                            self.ejecutar(block_elif)
+                    for cond_elif, block_elif in bloques_elif:#entonces se evalua cada una de las condiciones de los elif en orden, y si alguna de las condiciones de los elif se evalua como True, entonces se ejecuta el bloque de instrucciones correspondiente a ese elif 
+                            self.ejecutar(block_elif)#se ejecuta
                             evaluado = True
                             break
-                    if not evaluado and bloque_else:
-                        self.ejecutar(bloque_else)
+                    if not evaluado and bloque_else:#si ninguna de las condiciones de los elif se evaluó como True, y además existe un bloque de instrucciones para el else, entonces se ejecuta el bloque de instrucciones del else
+                        self.ejecutar(bloque_else)#se ejecuta el bloque de instrucciones del else si ninguna de las condiciones anteriores se evaluó como True, 
 
 
-def compilar_ejecutar():
-    codigo = texto_codigo.get("1.0", tk.END)
-    consola.config(state=tk.NORMAL)
-    consola.delete("1.0", tk.END)
+def compilar_ejecutar():#esta función se llama cuando el usuario hace clic en el botón Ejecutar Código en la interfaz , y se encarga de tomar el código fuente escrito por el usuario en el widget de texto, pasarlo por el lexer para obtener los tokens, luego por el parser para obtener la estructura de instrucciones, y finalmente crear una instancia del interprete para ejecutar esas instrucciones y mostrar los resultados en la consola, además maneja cualquier error que pueda ocurrir durante este proceso y los muestra en la consola para que el usuario pueda corregir su código
+    codigo = texto_codigo.get("1.0", tk.END)# Toma todo el texto que el usuario escribió en la caja de código, desde la primera línea hasta el final
+    consola.config(state=tk.NORMAL)# Habilita temporalmente la consola de salida para poder escribir los resultados o errores
+    consola.delete("1.0", tk.END)# Borra todo lo que tenía la consola antes para que no se amontone con la nueva ejecución
     
-    try:
-        tokens = lexer(codigo)
-        parser = Parser(tokens)
-        arbol = parser.parse()
-        interprete = Interpreter(consola)
-        interprete.ejecutar(arbol)
+    try:#
+        tokens = lexer(codigo)#Pasa el código texto por el lexer para romperlo y convertirlo en una lista de tokens
+        parser = Parser(tokens)#Le entrega los tokens al Parser para acomodarlos en orden estructurado
+        arbol = parser.parse()#El parser genera el "árbol" de instrucciones es decir la lista con la lógica organizada
+        interprete = Interpreter(consola)#Crea el intérprete y le pasa la consola para saber dónde pintar los resultados
+        interprete.ejecutar(arbol)#El intérprete lee el árbol y ejecuta las acciones una por una en la vida real
     except Exception as e:
-        consola.insert(tk.END, f"Error: {str(e)}")
+        consola.insert(tk.END, f"Error: {str(e)}")# Si algo falla en el lexer, parser o intérprete, atrapa el error y lo pinta en la consola en color verde
     finally:
-        consola.config(state=tk.DISABLED)
+        consola.config(state=tk.DISABLED)# Pase lo que pase corra bien o con error, vuelve a bloquear la consola para que el usuario no pueda escribir en ella directamente
 
+# Crea la ventana principal de la interfaz gráfica usando Tkinter
 root = tk.Tk()
-root.title("IDE - Rayatronic Oficial")
-root.geometry("650x550")
+root.title("IDE - Rayatronic Oficial")#titulo
+root.geometry("650x550")#tamaño
 
-tk.Label(root, text="Código Fuente:").pack(anchor="w", padx=10)
-texto_codigo = scrolledtext.ScrolledText(root, height=14, width=75, font=("Consolas", 11))
-texto_codigo.pack(padx=10, pady=5)
+tk.Label(root, text="Código Fuente:").pack(anchor="w", padx=10)# Crea y acomoda la etiqueta (texto descriptivo) para el área de código fuente
+texto_codigo = scrolledtext.ScrolledText(root, height=14, width=75, font=("Consolas", 11))# Crea la caja de texto grande con barra de desplazamiento  para escribir el código fuente
+texto_codigo.pack(padx=10, pady=5)# Lo acomoda en la ventana dándole un margen
 
 #coigo prueba
 codigo_prueba = """ent @v_calificacion ~
