@@ -281,8 +281,8 @@ class Interpreter:#aqui se ejecutan las instrucciones parseadas por el parser, r
 
 def compilar_ejecutar():#esta función se llama cuando el usuario hace clic en el botón Ejecutar Código en la interfaz , y se encarga de tomar el código fuente escrito por el usuario en el widget de texto, pasarlo por el lexer para obtener los tokens, luego por el parser para obtener la estructura de instrucciones, y finalmente crear una instancia del interprete para ejecutar esas instrucciones y mostrar los resultados en la consola, además maneja cualquier error que pueda ocurrir durante este proceso y los muestra en la consola para que el usuario pueda corregir su código
     codigo = texto_codigo.get("1.0", tk.END)# Toma todo el texto que el usuario escribió en la caja de código, desde la primera línea hasta el final
-    consola.config(state=tk.NORMAL)# Habilita temporalmente la consola de salida para poder escribir los resultados o errores
-    consola.delete("1.0", tk.END)# Borra todo lo que tenía la consola antes para que no se amontone con la nueva ejecución
+    consola.config(state=tk.NORMAL)#Habilita temporalmente la consola de salida para poder escribir los resultados o errores
+    consola.delete("1.0", tk.END)#Borra todo lo que tenía la consola antes para que no se amontone con la nueva ejecución
     
     try:#
         tokens = lexer(codigo)#Pasa el código texto por el lexer para romperlo y convertirlo en una lista de tokens
@@ -291,18 +291,18 @@ def compilar_ejecutar():#esta función se llama cuando el usuario hace clic en e
         interprete = Interpreter(consola)#Crea el intérprete y le pasa la consola para saber dónde pintar los resultados
         interprete.ejecutar(arbol)#El intérprete lee el árbol y ejecuta las acciones una por una en la vida real
     except Exception as e:
-        consola.insert(tk.END, f"Error: {str(e)}")# Si algo falla en el lexer, parser o intérprete, atrapa el error y lo pinta en la consola en color verde
+        consola.insert(tk.END, f"Error: {str(e)}")#Si algo falla en el lexer, parser o intérprete, atrapa el error y lo pinta en la consola en color verde
     finally:
-        consola.config(state=tk.DISABLED)# Pase lo que pase corra bien o con error, vuelve a bloquear la consola para que el usuario no pueda escribir en ella directamente
+        consola.config(state=tk.DISABLED)#Pase lo que pase corra bien o con error, vuelve a bloquear la consola para que el usuario no pueda escribir en ella directamente
 
-# Crea la ventana principal de la interfaz gráfica usando Tkinter
+#Crea la ventana principal de la interfaz gráfica usando Tkinter
 root = tk.Tk()
 root.title("IDE - Rayatronic Oficial")#titulo
 root.geometry("650x550")#tamaño
 
-tk.Label(root, text="Código Fuente:").pack(anchor="w", padx=10)# Crea y acomoda la etiqueta (texto descriptivo) para el área de código fuente
+tk.Label(root, text="Código Fuente:").pack(anchor="w", padx=10)#Crea y acomoda la etiqueta (texto descriptivo) para el área de código fuente
 texto_codigo = scrolledtext.ScrolledText(root, height=14, width=75, font=("Consolas", 11))# Crea la caja de texto grande con barra de desplazamiento  para escribir el código fuente
-texto_codigo.pack(padx=10, pady=5)# Lo acomoda en la ventana dándole un margen
+texto_codigo.pack(padx=10, pady=5)#Lo acomoda en la ventana dándole un margen
 
 #coigo prueba
 codigo_prueba = """ent @v_calificacion ~
