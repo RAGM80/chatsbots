@@ -2,36 +2,40 @@ import tkinter as tk
 from tkinter import scrolledtext
 import os
 
-carpeta_actual = os.path.dirname(os.path.abspath(__file__))
-nombretxt = os.path.join(carpeta_actual, "memoria.txt") 
-respuestas = {}
+carpeta_actual = os.path.dirname(os.path.abspath(__file__))# Obtiene la ruta de la carpeta exacta donde está guardado este script de Python
+nombretxt = os.path.join(carpeta_actual, "memoria.txt") # Crea la ruta completa para el archivo de texto donde el chat guardará lo que aprenda
+respuestas = {}# Diccionario vacío que usaremos para cargar las preguntas y respuestas en la memoria RAM
 
-if not os.path.exists(nombretxt):
+if not os.path.exists(nombretxt):# Si el archivo memoria.txt no existe todavía, lo crea vacío para evitar que el programa truene
     with open(nombretxt, "w", encoding="utf-8") as f:
         pass
 
-with open(nombretxt, "r", encoding="utf-8") as f: 
-    lineas = [linea.strip() for linea in f.readlines() if linea.strip()]
+with open(nombretxt, "r", encoding="utf-8") as f: # Abre el archivo en modo lectura para cargar los conocimientos previos que ya tiene guardados
+    lineas = [linea.strip() for linea in f.readlines() if linea.strip()]# Lee todas las líneas, les quita los espacios sueltos (\n) y descarta las líneas que estén vacías
     
-    for i in range(0, len(lineas) - 1, 2): 
-        pregunta = lineas[i].lower()
-        respuesta = lineas[i+1]
-        respuestas[pregunta] = respuesta
+    for i in range(0, len(lineas) - 1, 2): # Recorre la lista de dos en dos ,una línea es pregunta, la siguiente es respuesta
+        pregunta = lineas[i].lower()# Convierte la pregunta a minúsculas para que sea fácil de buscar
+        respuesta = lineas[i+1]# Agarra la respuesta tal cual
+        respuestas[pregunta] = respuesta# Las empareja dentro del diccionario
 
-estado_aprendizaje = False
-pregunta_pendiente = ""
+
+
+
+# Variables de control para saber si el usuario le está enseñando algo nuevo al bot
+estado_aprendizaje = False# Si es True, significa que el próximo mensaje que mandes será una respuesta nueva
+pregunta_pendiente = ""# Guarda temporalmente la frase que el bot no entendió
 
 def procesar_mensaje(event=None):
     global estado_aprendizaje, pregunta_pendiente
     
    
-    usuario = entrada_texto.get().strip()
+    usuario = entrada_texto.get().strip()# Obtiene el texto que el usuario escribió en la cajita de entrada y le quita espacios vacíos
     if not usuario:
-        return 
+        return # Si el usuario no escribió nada, ignora el clic o el Enter
     
-    chat_area.config(state=tk.NORMAL)
-    chat_area.insert(tk.END, "Tú: " + usuario + "\n")
-    entrada_texto.delete(0, tk.END) 
+    chat_area.config(state=tk.NORMAL)# Desbloquea temporalmente la pantalla del chat para poder escribir en ella
+    chat_area.insert(tk.END, "Tú: " + usuario + "\n")# Pinta en la pantalla lo que tú acabas de escribir
+    entrada_texto.delete(0, tk.END) # Borra el texto de la cajita de entrada para dejarla limpia para el siguiente mensaje
     
     if usuario.lower() == "salir":
         ventana.quit()
