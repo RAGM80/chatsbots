@@ -36,11 +36,10 @@ def procesar_mensaje(event=None):
     chat_area.config(state=tk.NORMAL)#desbloquea temporalmente la pantalla del chat para poder escribir en ella
     chat_area.insert(tk.END, "Tú: " + usuario + "\n")#pinta en la pantalla lo que tú acabas de escribir
     entrada_texto.delete(0, tk.END) #borra el texto de la cajita de entrada para dejarla limpia para el siguiente mensaje
-    
     if usuario.lower() == "salir":
         ventana.quit()
         return#si escribes la palabra  "salir", cierra la interfaz gráfica por completo
-
+    #estado 1
     if estado_aprendizaje:#el bot estaba esperando que le enseñaras la respuesta a una pregunta pasada
         nuevaresp = usuario#el mensaje actual se convierte en la nueva respuesta aprendida
         respuestas[pregunta_pendiente.lower()] = nuevaresp#guarda la respuesta en la RAM
@@ -53,15 +52,30 @@ def procesar_mensaje(event=None):
         
         estado_aprendizaje = False#apaga el modo aprendizaje y limpia la variable temporal
         pregunta_pendiente = ""
+    #estado 0
     else:
         usuario_minuscula = usuario.lower()#si es una conversación normal, busca si lo que escribiste ya está en sus datos
+        for signo_espacio in [",", ".", ";", ":"]:
+            usuario_minuscula = usuario_minuscula.replace(signo_espacio, " ")
+        for signo in ["?", "!", "¿", "¡"]:# borramos por completo los signos de apertura y de lo que quede
+            usuario_minuscula = usuario_minuscula.replace(signo, "")
         encontrado = False
-        
-        for pregunta_guardada, respuesta_guardada in respuestas.items():#recorre todo el diccionario de preguntas y respuestas guardadas
-            if pregunta_guardada in usuario_minuscula or usuario_minuscula in pregunta_guardada:#revisa si lo que escribiste contiene la pregunta guardada, o si la pregunta guardada está dentro de tu texto
-                chat_area.insert(tk.END, "ChatLaimon: " + respuesta_guardada + "\n\n")
-                encontrado = True
-                break #si ya encontró la respuesta, rompe el ciclo para no seguir buscando
+        if usuario_minuscula in respuestas:#prioridad 1: coincidencia exacta completa
+            chat_area.insert(tk.END, "ChatLaimon: " + respuestas[usuario_minuscula] + "\n\n")
+            encontrado = True
+        if not encontrado:#prioridad 2: validación inteligente por longitud de lista
+            palabras_lista = usuario_minuscula.split()
+            
+            
+            if len(palabras_lista) == 1:#caso a: si el usuario escribió una sola palabra suelta como holaaaaaaaa
+                palabra_unica = palabras_lista[0]
+                for pregunta_guardada, respuesta_guardada in respuestas.items():
+                    if pregunta_guardada in palabra_unica:
+                        chat_area.insert(tk.END, "ChatLaimon: " + respuesta_guardada + "\n\n")
+                        encontrado = True
+                        break
+            else:#caso b: si escribió más de una palabra, no adivina para respetar el contexto largo
+                pass
         if not encontrado:#si terminó de buscar en toda la memoria y no tuvo ni una coincidencia
             chat_area.insert(tk.END, "ChatLaimon: No sé qué decir. ¿qué te digo? (Escribe la respuesta para enseñarme)\n\n")#mensaje al mandar
             estado_aprendizaje = True#activa el modo aprendizaje para procesar tu siguiente mensaje

@@ -60,3 +60,11 @@ alexis
 el mejor profe del ilb
 gato
 miau
+perro
+guau
+dame la suma de 2 numeros
+2 + 3 es 5
+dame
+¿Qué quieres que te de?
+hola te quiero
+yo tambien te quiero
