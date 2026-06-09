@@ -18,9 +18,6 @@ with open(nombretxt, "r", encoding="utf-8") as f: #abre el archivo en modo lectu
         respuesta = lineas[i+1]#agarra la respuesta tal cual
         respuestas[pregunta] = respuesta#las empareja dentro del diccionario
 
-
-
-
 #variables de control para saber si el usuario le está enseñando algo nuevo al bot
 estado_aprendizaje = False#si es True, significa que el próximo mensaje que mandes será una respuesta nueva
 pregunta_pendiente = ""#guarda temporalmente la frase que el bot no entendió
@@ -80,25 +77,21 @@ def procesar_mensaje(event=None):
             chat_area.insert(tk.END, "ChatLaimon: No sé qué decir. ¿qué te digo? (Escribe la respuesta para enseñarme)\n\n")#mensaje al mandar
             estado_aprendizaje = True#activa el modo aprendizaje para procesar tu siguiente mensaje
             pregunta_pendiente = usuario#registra qué frase fue la que causó la duda
-    
-   
     chat_area.yview(tk.END)
     chat_area.config(state=tk.DISABLED)
 ventana = tk.Tk()
-ventana.title("ChatLaimon (EL MEJOR CHAT DEL MUNDO ;) )")
+ventana.title("ChatLaimon (EL MEJOR CHAT DEL MUNDO :D )")
 ventana.geometry("450x550")
 ventana.config(bg="#f0f0f0")
 chat_area = scrolledtext.ScrolledText(ventana, wrap=tk.WORD, font=("Consolas", 11))
 chat_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 chat_area.insert(tk.END, "ChatLaimon INICIANDO,DIME TUS MAS OSCUROS SECRETOS...\n\n")
 chat_area.config(state=tk.DISABLED) 
-
 frame_inferior = tk.Frame(ventana, bg="#f0f0f0")
 frame_inferior.pack(padx=10, pady=(0, 10), fill=tk.X)
 entrada_texto = tk.Entry(frame_inferior, font=("Arial", 12))
 entrada_texto.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
 entrada_texto.bind("<Return>", procesar_mensaje) 
-
 boton_enviar = tk.Button(frame_inferior, text="Enviar", command=procesar_mensaje, bg="#4CAF50", fg="white", font=("Arial", 10, "bold"))
 boton_enviar.pack(side=tk.RIGHT)
 entrada_texto.focus() 
